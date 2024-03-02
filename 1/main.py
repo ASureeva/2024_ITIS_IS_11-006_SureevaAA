@@ -1,7 +1,11 @@
 import requests
 import re
+from urllib.parse import urlparse, urljoin, unquote
 from bs4 import BeautifulSoup
 import os
+
+
+currency_links = []
 
 
 def delete_files_in_folder(folder_path):
@@ -36,33 +40,46 @@ def get_links(url, index, l, h_url):
         # print(r.text)
     soup = BeautifulSoup(r.text, features="html.parser")
 
-    links = re.findall(fr'{h_url}/.[^"]+(?:"|</|s)', r.text)
-    links[:] = [f'{URL}{link[len(h_url):]}' for link in links]
-    links.extend(re.findall(r'https://.[^"]+(?:"|</|s)', r.text))
+    links = []
+    for a in soup.find_all('a'):
+        link = a.get("href")
+        link = urljoin(url, link)
+        parsed_href = urlparse(link)
 
-    links[:] = [link for link in links if links not in currency_links and link not in l]
+        link = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+        links.append(link)
 
-    text = soup.get_text()
+    print(currency_links)
+
+    # links = re.findall(fr'{h_url}/.[^"]+(?:"|</|s)', r.text)
+    # links[:] = [f'{URL}{link[len(h_url):]}' for link in links]
+    # links.extend(re.findall(r'https://.[^"]+(?:"|</|s)', r.text))
+    #
+    # links[:] = [link for link in links if links not in currency_links and link not in l]
+
+    text = soup.get_text(separator=' ')
     # print(text)
     text_of_page = re.sub(r'([^а-яА-ЯёЁ-])', ' ', text)
+    text_in_pages = re.sub(r'\s\s+', '\n', text_of_page)
 
-    words = re.split(r'\s+|\t|\n|-+\s+', text_of_page)
+    words = re.split(r'-+\s+|\s+-+|\s+|\t|\n', text_of_page)
 
     while ' ' in words:
         words.remove(' ')
 
-    word_length = len(words)
+    while '-' in words:
+        words.remove('-')
 
-    print(url, word_length)
+    word_length = len(words)
+    # print(word_length, url, words)
 
     if word_length > 999 and r.url not in currency_links and url not in currency_links:
         file = open('index.txt', 'a', encoding="utf-8")
-        file.write(f"{index} {url} {word_length}\n")
-        print(url)
+        file.write(f"{index} {unquote(url)} {word_length}\n")
         file.close()
         currency_links.extend([r.url, url])
         page = open(f'pages/{index}.txt', 'w', encoding="utf-8")
-        page.write(text_of_page)
+        page.write(text_in_pages)
         page.close()
         index += 1
         return index, links
@@ -75,7 +92,7 @@ def get_links(url, index, l, h_url):
 delete_files_in_folder('pages/')
 
 URL_default = 'https://minecraft.fandom.com/ru'
-# URL = 'https://ru.wikipedia.org/wiki'
+# URL = 'https://ru.wikipedia.org/wiki'https://habr.com/ru/feed/
 
 
 def create_home_url(URL):
@@ -88,7 +105,6 @@ def create_home_url(URL):
 links_to_site = []
 link_other = []
 site_index = 0
-currency_links = []
 
 
 file = open('index.txt', 'w', encoding="utf-8")
@@ -99,7 +115,7 @@ file.close()
 if __name__ == '__main__':
     URL = []
     counter = True
-    print('укажите ссылки:')
+    print('укажите ссылку:')
     while counter:
         input_url = input()
         if input_url:
@@ -118,10 +134,8 @@ if __name__ == '__main__':
         if site_index != 0:
             links_to_site.extend(answer[1])
             while site_index < 101:
-                print(site_index)
                 link = links_to_site.pop(0)
-                print(len(links_to_site))
-                answer = get_links(url=f'{link[:-1]}', index=site_index, l=links_to_site, h_url=home_urls[i])
+                answer = get_links(url=f'{link}', index=site_index, l=links_to_site, h_url=home_urls[i])
                 index = answer[0]
                 if index != 0:
                     site_index = index
