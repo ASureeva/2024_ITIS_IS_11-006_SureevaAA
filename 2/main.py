@@ -29,12 +29,12 @@ stop_words = re.split(r'[\s\n]', stop_words)
 
 
 if __name__ == '__main__':
-    for i in range(0, 102):
+    for i in range(0, 101):
         file = open(f'../1/pages/{i}.txt', 'r', encoding="utf-8")
         text = file.read()
         file.close()
 
-        currency_words = re.split(r'\s+|\t|\n|-+\s+', text)
+        currency_words = re.split(r'-+\s+|\s+-+|\s+|\t|\n', text)
 
         page = open(f'tokens/{i}.txt', 'a', encoding="utf-8")
 
