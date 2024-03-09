@@ -1,7 +1,7 @@
 import requests
 import re
 from urllib.parse import urlparse, urljoin, unquote
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, UnicodeDammit
 import os
 
 
@@ -28,7 +28,6 @@ def get_links(url, index, l, h_url):
         print('oops')
         return [0]
 
-    print(r.headers)
 
     try:
         if r.headers['content-type'][:9] == 'text/html':
@@ -49,8 +48,6 @@ def get_links(url, index, l, h_url):
         link = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
         links.append(link)
 
-    print(currency_links)
-
     # links = re.findall(fr'{h_url}/.[^"]+(?:"|</|s)', r.text)
     # links[:] = [f'{URL}{link[len(h_url):]}' for link in links]
     # links.extend(re.findall(r'https://.[^"]+(?:"|</|s)', r.text))
@@ -58,9 +55,12 @@ def get_links(url, index, l, h_url):
     # links[:] = [link for link in links if links not in currency_links and link not in l]
 
     text = soup.get_text(separator=' ')
-    # print(text)
+
+    text_for_check = re.sub(r'[а-яА-ЯёЁ-]', '', text)
     text_of_page = re.sub(r'([^а-яА-ЯёЁ-])', ' ', text)
     text_in_pages = re.sub(r'\s\s+', '\n', text_of_page)
+
+    ru = len(text_for_check) / len(text_in_pages)
 
     words = re.split(r'-+\s+|\s+-+|\s+|\t|\n', text_of_page)
 
@@ -73,10 +73,11 @@ def get_links(url, index, l, h_url):
     word_length = len(words)
     # print(word_length, url, words)
 
-    if word_length > 999 and r.url not in currency_links and url not in currency_links:
+    if word_length > 999 and r.url not in currency_links and url not in currency_links and ru <= 1:
         file = open('index.txt', 'a', encoding="utf-8")
         file.write(f"{index} {unquote(url)} {word_length}\n")
         file.close()
+        print(index)
         currency_links.extend([r.url, url])
         page = open(f'pages/{index}.txt', 'w', encoding="utf-8")
         page.write(text_in_pages)

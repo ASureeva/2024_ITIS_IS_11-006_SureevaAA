@@ -34,14 +34,38 @@ if __name__ == '__main__':
         text = file.read()
         file.close()
 
-        currency_words = re.split(r'-+\s+|\s+-+|\s+|\t|\n', text)
+        currency_words = ['']
+        currency_index = 0
+        for j in text:
+            if re.fullmatch(r'\n', j):
+                currency_index += 2
+                currency_words.append('1')
+                currency_words.append('')
+            elif re.fullmatch(r'\s', j):
+                currency_index += 2
+                currency_words.append('2')
+                currency_words.append('')
+            elif j == '-':
+                if re.fullmatch(r'\s', text[text.index(j) - 1]):
+                    pass
+                elif re.fullmatch(r'\s', text[text.index(j) + 1]):
+                    currency_index += 1
+                    currency_words.append('')
+            else:
+                currency_words[currency_index] += j
+
+        # currency_words = re.split(r'-+\s+|\s+-+|\s+|\t|\n', text)
 
         page = open(f'tokens/{i}.txt', 'a', encoding="utf-8")
 
         for word in currency_words:
             if word:
                 word = normalizer(word).lower()
-                if word not in stop_words:
-                    page.write(f'{word}\n')
+                if word not in stop_words and word not in ['1', '2']:
+                    page.write(f'{word}')
+                if word == '1':
+                    page.write('\n')
+                if word == '2':
+                    page.write(' ')
 
         page.close()
