@@ -33,34 +33,49 @@ for i in range(100):
             dictionary[word] = [i]
     file.close()
 
-print(dictionary)
+file = open('dictionary.txt', 'w',  encoding="utf-8")
+file.write('')
+file.close()
+
+for key in dict(sorted(dictionary.items())):
+    file = open('dictionary.txt', 'a',  encoding="utf-8")
+    file.write(f"{key}: {dictionary[key]}\n")
+file.close()
+
 # str = 'колодезный | альпийский & ! материал | успешно'
 
-str = str(input())
 
-str = str.split(' ')
-answer = str
+def main_(str):
+    str = str.split(' ')
+    answer = str
 
-for i, element in enumerate(answer):
-    if element not in ['|', '&', '!']:
-        answer[i] = dictionary[answer[i]]
+    for i, element in enumerate(answer):
+        if element not in ['|', '&', '!']:
+            answer[i] = dictionary[answer[i]]
 
-while '!' in answer:
-    index = answer.index('!') + 1
-    answer[index] = disintersection(answer[index])
-    answer.remove('!')
+    while '!' in answer:
+        index = answer.index('!') + 1
+        answer[index] = disintersection(answer[index])
+        answer.remove('!')
 
-while '&' in answer:
-    index = answer.index('&') + 1
-    answer[index] = intersection(answer[index - 2], answer[index])
-    answer.remove('&')
-    answer.pop(index-2)
+    while '&' in answer:
+        index = answer.index('&') + 1
+        answer[index] = intersection(answer[index - 2], answer[index])
+        answer.remove('&')
+        answer.pop(index-2)
+
+    while '|' in answer:
+        index = answer.index('|') + 1
+        answer[index] = list(set(answer[index - 2] + answer[index]))
+        answer.remove('|')
+        answer.pop(index-2)
+
+    return str
 
 
-while '|' in answer:
-    index = answer.index('|') + 1
-    answer[index] = list(set(answer[index - 2] + answer[index]))
-    answer.remove('|')
-    answer.pop(index-2)
-
-print(str)
+if __name__ == '__main__':
+    strings = ['колодезный & альпийский | материал', 'колодезный | альпийский | материал',
+               'колодезный & альпийский & материал', 'колодезный & ! альпийский | ! материал',
+               'колодезный | ! альпийский | ! материал']
+    for string in strings:
+        print(main_(string))
