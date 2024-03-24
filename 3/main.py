@@ -18,19 +18,20 @@ def disintersection(list2):
     return list3
 
 
-for i in range(100):
+for i in range(101):
     file = open(f'../2/tokens/{i}.txt', 'r',  encoding="utf-8")
     words = file.read()
     words = re.split(r'[\s\n]', words)
-    words.remove('')
-    # print(words)
+    while '' in words:
+        words.remove('')
     unic_words.append(set(words))
     # print(len(words), len(unic_words[i]))
     for word in list(unic_words[i]):
-        if word in dictionary:
-            dictionary[word].append(i)
-        else:
-            dictionary[word] = [i]
+        if word != " ":
+            if word in dictionary:
+                dictionary[word].append(i)
+            else:
+                dictionary[word] = [i]
     file.close()
 
 file = open('dictionary.txt', 'w',  encoding="utf-8")
