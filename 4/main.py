@@ -54,7 +54,7 @@ def get_tf():
 
 def get_idf():
     data = {"Word": [key[0] for key in sorted_dict_tf.items()],
-            "Idf": [round(math.log(n_of_document_in_coll / len(key[0])), 5) for key in sorted_dict_in_file.items()]}
+            "Idf": [round(math.log(n_of_document_in_coll / len(key[1]), 10), 5) for key in sorted_dict_in_file.items()]}
     df = pd.DataFrame(data)
     df.to_excel('./idf.xlsx')
 
@@ -62,7 +62,8 @@ def get_idf():
 def get_tf_idf():
     data = {}
     for i in range(101):
-        data[f'Document № {i}'] = [round((key[1][i] / words_len[i]) * math.log(n_of_document_in_coll / len(key[0])), 5) for key in sorted_dict_tf.items()]
+        data[f'Document № {i}'] = [round((key[1][i] / words_len[i]) * math.log(n_of_document_in_coll / len(sorted_dict_in_file[key[0]]), 10), 5) for key in sorted_dict_tf.items()]
+        print(data[f'Document № {i}'])
     df = pd.DataFrame(data)
     df.insert(0, "Word", [key[0] for key in sorted_dict_tf.items()], True)
     df.to_excel('./tf_idf.xlsx')
