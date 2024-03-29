@@ -3,19 +3,19 @@ import math
 import pandas as pd
 
 
-dictionary = []
-
-
-with open(f'../4/dictionary.txt', encoding="utf-8") as file:
-    for line in file:
-        line_ = line.split(' ')
-        dictionary.append(line_[0][:-1])
+# dictionary = []
+#
+#
+# with open(f'../4/dictionary.txt', encoding="utf-8") as file:
+#     for line in file:
+#         line_ = line.split(' ')
+#         dictionary.append(line_[0][:-1])
 
 
 def get_vector(words):
     vector = [0 for _ in range(len(dictionary))]
     for word in words:
-        vector[dictionary.index(word)] = 1
+        vector[int(numpy.where(dictionary == word)[0][0])] = 1
     return vector
 
 
@@ -38,6 +38,8 @@ vectors = []
 answer = {}
 tf_idf = pd.read_excel('../4/tf_idf.xlsx')
 tf_idf = tf_idf.to_numpy()
+dictionary = tf_idf[:, 1]
+
 
 for index, query in enumerate(queries):
     vectors.append(get_vector(query.split(' ')))

@@ -13,10 +13,10 @@ words_len = {
 
 }
 # number of documents in the collection
-n_of_document_in_coll = 101
+n_of_document_in_coll = 100
 
 
-for i in range(101):
+for i in range(100):
     file = open(f'../2/tokens/{i}.txt', 'r',  encoding="utf-8")
     words = file.read()
     words = re.split(r'[\s\n]', words)
@@ -34,7 +34,7 @@ for i in range(101):
                     dictionary['tf'][word][i] += 1
             else:
                 dictionary['in_file'][word] = [i]
-                dictionary['tf'][word] = [0 for j in range(101)]
+                dictionary['tf'][word] = [0 for j in range(100)]
                 dictionary['tf'][word][i] += 1
     file.close()
 
@@ -45,8 +45,8 @@ sorted_dict_tf = dict(sorted(dictionary['tf'].items()))
 
 def get_tf():
     data = {}
-    for i in range(101):
-        data[f'Document № {i}'] = [round(key[1][i] / words_len[i], 5) for key in sorted_dict_tf.items()]
+    for i in range(100):
+        data[f'{i}'] = [round(key[1][i] / words_len[i], 5) for key in sorted_dict_tf.items()]
     df = pd.DataFrame(data)
     df.insert(0, "Word", [key[0] for key in sorted_dict_tf.items()], True)
     df.to_excel('./tf.xlsx')
@@ -61,9 +61,8 @@ def get_idf():
 
 def get_tf_idf():
     data = {}
-    for i in range(101):
-        data[f'Document № {i}'] = [round((key[1][i] / words_len[i]) * math.log(n_of_document_in_coll / len(sorted_dict_in_file[key[0]]), 10), 5) for key in sorted_dict_tf.items()]
-        print(data[f'Document № {i}'])
+    for i in range(100):
+        data[f'{i}'] = [round((key[1][i] / words_len[i]) * math.log(n_of_document_in_coll / len(sorted_dict_in_file[key[0]]), 10), 5) for key in sorted_dict_tf.items()]
     df = pd.DataFrame(data)
     df.insert(0, "Word", [key[0] for key in sorted_dict_tf.items()], True)
     df.to_excel('./tf_idf.xlsx')
